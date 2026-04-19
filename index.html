@@ -1448,66 +1448,69 @@ if (notifyBtn) {
         syncToGoogleSheets(name, type, dateStr, 1);
     };
 
-// ==========================================
-// 鏡頭與雙模式掃描邏輯 (YOLO + OCR)
-// ==========================================
-// ⭕ 修改為 (範例)：
-const SERVER_URL = "https://food-guardian-backend.onrender.com";
-const videoEl = document.getElementById('local-video');
-const canvasEl = document.getElementById('snapshot-canvas');
-const ocrCameraBtn = document.getElementById('ocr-camera-btn'); // OCR 辨識
-const ocrUpload = document.getElementById('ocr-upload'); // 相簿上傳
-// --- 1. 相機全域變數 (請確保這上方沒有重複定義 localStream) ---
+// --- 1. 相機專用的唯一變數設定 (不要重複宣告！) ---
 let currentFacingMode = 'environment'; 
 let localStream = null;
 
-// --- 2. 啟動相機的引擎 (手機轉向優化版) ---
+// --- 2. 啟動相機的引擎 (穩定相容版) ---
 async function startCameraEngine() {
-    // A. 徹底釋放舊資源，避免手機鏡頭被佔用
+    // A. 優先恢復按鈕狀態，避免系統卡死
+    startBtn.disabled = true; 
+    stopBtn.disabled = false; 
+    switchBtn.disabled = false; 
+
+    // B. 徹底關閉舊相機，這是轉向成功的關鍵
     if (localStream) {
-        localStream.getTracks().forEach(track => track.stop());
+        localStream.getTracks().forEach(track => {
+            track.stop();
+            console.log("舊軌道已關閉");
+        });
+        localStream = null;
     }
 
-    const videoConstraints = { 
+    // C. 設定最相容的參數 (針對手機優化)
+    const constraints = { 
         video: { 
-            // 使用 exact 強制手機切換，若失敗則由 catch 處理
-            facingMode: currentFacingMode, 
+            facingMode: currentFacingMode, // 使用字串模式，提高手機相容性
             width: { ideal: 1280 },
             height: { ideal: 720 }
         } 
     };
 
     try {
-        localStream = await navigator.mediaDevices.getUserMedia(videoConstraints);
+        localStream = await navigator.mediaDevices.getUserMedia(constraints);
         videoEl.srcObject = localStream;
         videoEl.style.display = 'block'; 
         document.getElementById('camera-overlay').classList.add('hidden'); 
         
-        // B. 解鎖按鈕
-        startBtn.disabled = true; 
-        stopBtn.disabled = false; 
-        switchBtn.disabled = false; // 👈 確保這行有跑，按鈕才能按
+        // D. 開啟辨識按鈕
         rescanBtn.disabled = false; 
         ocrCameraBtn.disabled = false; 
+        console.log("相機啟動成功，目前模式:", currentFacingMode);
     } catch (err) {
         console.error("相機啟動失敗:", err);
-        Swal.fire('鏡頭錯誤', '請確認已授權相機權限，並重新整理網頁！', 'error');
+        // 如果失敗，恢復「開啟」按鈕讓使用者可以重試
+        startBtn.disabled = false;
+        Swal.fire({
+            title: '鏡頭錯誤',
+            text: '請確認已授權相機權限，並嘗試重新整理網頁！',
+            icon: 'error',
+            confirmButtonColor: '#0ea5e9'
+        });
     }
 }
 
 // --- 3. 綁定按鈕事件 ---
-// 開啟
 if(startBtn) startBtn.addEventListener('click', startCameraEngine);
 
-// 切換鏡頭 (核心修正)
 if(switchBtn) {
     switchBtn.addEventListener('click', () => {
-        // 切換模式：如果是 environment 就換成 user，反之亦然
+        // 切換前後鏡頭
         currentFacingMode = (currentFacingMode === 'environment') ? 'user' : 'environment';
         
-        // 增加一個簡單的 Loading 提示，改善 Candy Tech 互動感
+        // 顯示切換動畫，提升互動感
         Swal.fire({
-            title: '切換鏡頭中...',
+            title: '切換中...',
             timer: 800,
             showConfirmButton: false,
             didOpen: () => { Swal.showLoading(); }
@@ -1517,7 +1520,6 @@ if(switchBtn) {
     });
 }
 
-// 關閉
 if(stopBtn) stopBtn.addEventListener('click', () => { 
     if (localStream) {
         localStream.getTracks().forEach(track => track.stop()); 
@@ -1529,23 +1531,8 @@ if(stopBtn) stopBtn.addEventListener('click', () => {
     startBtn.disabled = false; 
     stopBtn.disabled = true; 
     switchBtn.disabled = true; 
-});
-
-// 2. 關閉手機/電腦鏡頭
-if(stopBtn) stopBtn.addEventListener('click', () => { 
-    if (localStream) {
-        localStream.getTracks().forEach(track => track.stop()); 
-        localStream = null;
-    }
-    videoEl.srcObject = null;
-    videoEl.style.display = 'none'; 
-    document.getElementById('camera-overlay').classList.remove('hidden'); 
-    
-    startBtn.disabled = false; 
-    stopBtn.disabled = true; 
-    switchBtn.disabled = true; 
-    rescanBtn.disabled = true; 
-    ocrCameraBtn.disabled = true; 
+    rescanBtn.disabled = true;
+    ocrCameraBtn.disabled = true;
 });
 
 // 3. 原本的 YOLO 影像辨識邏輯 (保持不變，只綁定按鈕)
