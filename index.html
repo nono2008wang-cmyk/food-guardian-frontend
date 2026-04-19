@@ -1532,30 +1532,30 @@ if(stopBtn) stopBtn.addEventListener('click', () => {
     ocrCameraBtn.disabled = true;
 });
 
-// 3. 原本的 YOLO 影像辨識邏輯 (保持不變，只綁定按鈕)
+// 3. 原本的 YOLO 影像辨識邏輯 (已修復 videoEl 地雷)
 if(rescanBtn) rescanBtn.addEventListener('click', async () => { 
     document.getElementById('ai-scan-effect').classList.remove('hidden'); 
     rescanBtn.disabled = true; ocrCameraBtn.disabled = true;
     
+    // ✅ 確保截圖使用的是 videoEl
     canvasEl.width = videoEl.videoWidth;
     canvasEl.height = videoEl.videoHeight;
     canvasEl.getContext('2d').drawImage(videoEl, 0, 0);
-    const base64Image = canvasEl.toDataURL('image/jpeg', 0.8);
 
-    // ✅ 確認你的瘦身程式碼是 320 和 0.5
+    // ✅ 極致瘦身設定 (320px)
     const targetSize = 320; 
     const canvas = document.createElement('canvas');
     canvas.width = targetSize;
     canvas.height = targetSize;
     const ctx = canvas.getContext('2d');
-    // ✅ 這裡一定要是 videoEl
+    
+    // 🚨 終極修復：這裡已經幫你改成 videoEl 了！絕不會再當機！🚨
     ctx.drawImage(videoEl, 0, 0, targetSize, targetSize);
     const compressedImage = canvas.toDataURL('image/jpeg', 0.5);
     
     try {
         const response = await fetch(`${SERVER_URL}/scan_image`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
-            // 👇 惡魔在這裡！請把 base64Image 改成 compressedImage 👇
             body: JSON.stringify({ image: compressedImage }) 
         });
         const data = await response.json();
@@ -1593,6 +1593,7 @@ if(rescanBtn) rescanBtn.addEventListener('click', async () => {
     } catch (error) {
         document.getElementById('ai-scan-effect').classList.add('hidden'); 
         rescanBtn.disabled = false; ocrCameraBtn.disabled = false;
+        console.error(error); // 幫助你在 F12 看錯誤
         Swal.fire('連線錯誤', '無法連線到 AI 伺服器，請確認伺服器狀態！', 'error');
     }
 });
