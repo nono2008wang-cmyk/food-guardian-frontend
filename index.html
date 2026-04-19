@@ -1554,7 +1554,8 @@ if(rescanBtn) rescanBtn.addEventListener('click', async () => {
     try {
         const response = await fetch(`${SERVER_URL}/scan_image`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ image: base64Image })
+            // 👇 惡魔在這裡！請把 base64Image 改成 compressedImage 👇
+            body: JSON.stringify({ image: compressedImage }) 
         });
         const data = await response.json();
         
