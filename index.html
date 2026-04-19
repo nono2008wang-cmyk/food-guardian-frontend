@@ -1451,6 +1451,12 @@ if (notifyBtn) {
 // ==========================================
 // 🛡️ 整合後的相機與辨識邏輯 (無衝突版)
 // ==========================================
+const SERVER_URL = "https://food-guardian-backend.onrender.com";
+const videoEl = document.getElementById('local-video');
+const canvasEl = document.getElementById('snapshot-canvas');
+const switchBtn = document.getElementById('switch-camera-btn');
+const ocrCameraBtn = document.getElementById('ocr-camera-btn');
+const ocrUpload = document.getElementById('ocr-upload');
 
 // 1. 統一宣告變數 (確保這在整個 <script> 中只出現這一次)
 let currentFacingMode = 'environment'; 
