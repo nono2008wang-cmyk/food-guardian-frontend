@@ -1541,19 +1541,13 @@ if(rescanBtn) rescanBtn.addEventListener('click', async () => {
     canvasEl.getContext('2d').drawImage(videoEl, 0, 0);
     const base64Image = canvasEl.toDataURL('image/jpeg', 0.8);
 
-    // ✅ 【把你剛剛截圖的「瘦身程式碼」，貼在這裡！】 ✅
-    const video = document.querySelector('video'); 
-    
-    // 👇 把原本的 640 改成 320，進行極致瘦身 👇
+    // ✅ 確認你的瘦身程式碼是 320 和 0.5
     const targetSize = 320; 
-    
     const canvas = document.createElement('canvas');
     canvas.width = targetSize;
     canvas.height = targetSize;
     const ctx = canvas.getContext('2d');
     ctx.drawImage(video, 0, 0, targetSize, targetSize);
-    
-    // 👇 壓縮率調到 0.5，讓圖片容量變超小 👇
     const compressedImage = canvas.toDataURL('image/jpeg', 0.5);
     
     try {
