@@ -1452,7 +1452,7 @@ if (notifyBtn) {
 // 鏡頭與雙模式掃描邏輯 (YOLO + OCR)
 // ==========================================
 // ⭕ 修改為 (範例)：
-const SERVER_URL = "https://你的後端網址.onrender.com";
+const SERVER_URL = "https://food-guardian-backend.onrender.com";
 const videoEl = document.getElementById('local-video');
 const canvasEl = document.getElementById('snapshot-canvas');
 const ocrCameraBtn = document.getElementById('ocr-camera-btn'); // OCR 辨識
@@ -1563,6 +1563,16 @@ if(rescanBtn) rescanBtn.addEventListener('click', async () => {
     canvasEl.height = videoEl.videoHeight;
     canvasEl.getContext('2d').drawImage(videoEl, 0, 0);
     const base64Image = canvasEl.toDataURL('image/jpeg', 0.8);
+
+    // ✅ 【把你剛剛截圖的「瘦身程式碼」，貼在這裡！】 ✅
+    const video = document.querySelector('video'); 
+    const targetSize = 640;
+    const canvas = document.createElement('canvas');
+    canvas.width = targetSize;
+    canvas.height = targetSize;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, targetSize, targetSize);
+    const compressedImage = canvas.toDataURL('image/jpeg', 0.6);
     
     try {
         const response = await fetch(`${SERVER_URL}/scan_image`, {
