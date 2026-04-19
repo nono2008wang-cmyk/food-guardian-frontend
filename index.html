@@ -1448,69 +1448,58 @@ if (notifyBtn) {
         syncToGoogleSheets(name, type, dateStr, 1);
     };
 
-// --- 1. 相機專用的唯一變數設定 (不要重複宣告！) ---
+// ==========================================
+// 🛡️ 整合後的相機與辨識邏輯 (無衝突版)
+// ==========================================
+
+// 1. 統一宣告變數 (確保這在整個 <script> 中只出現這一次)
 let currentFacingMode = 'environment'; 
 let localStream = null;
 
-// --- 2. 啟動相機的引擎 (穩定相容版) ---
+// 2. 啟動相機的引擎 (手機轉向穩定版)
 async function startCameraEngine() {
-    // A. 優先恢復按鈕狀態，避免系統卡死
-    startBtn.disabled = true; 
-    stopBtn.disabled = false; 
-    switchBtn.disabled = false; 
-
-    // B. 徹底關閉舊相機，這是轉向成功的關鍵
+    // A. 徹底關閉舊相機，避免手機資源被佔用
     if (localStream) {
-        localStream.getTracks().forEach(track => {
-            track.stop();
-            console.log("舊軌道已關閉");
-        });
+        localStream.getTracks().forEach(track => track.stop());
         localStream = null;
     }
 
-    // C. 設定最相容的參數 (針對手機優化)
-    const constraints = { 
+    const videoConstraints = { 
         video: { 
-            facingMode: currentFacingMode, // 使用字串模式，提高手機相容性
+            facingMode: currentFacingMode, 
             width: { ideal: 1280 },
             height: { ideal: 720 }
         } 
     };
 
     try {
-        localStream = await navigator.mediaDevices.getUserMedia(constraints);
+        localStream = await navigator.mediaDevices.getUserMedia(videoConstraints);
         videoEl.srcObject = localStream;
         videoEl.style.display = 'block'; 
         document.getElementById('camera-overlay').classList.add('hidden'); 
         
-        // D. 開啟辨識按鈕
+        // B. 啟動成功後，解鎖功能按鈕
+        startBtn.disabled = true; 
+        stopBtn.disabled = false; 
+        switchBtn.disabled = false; 
         rescanBtn.disabled = false; 
         ocrCameraBtn.disabled = false; 
-        console.log("相機啟動成功，目前模式:", currentFacingMode);
     } catch (err) {
         console.error("相機啟動失敗:", err);
-        // 如果失敗，恢復「開啟」按鈕讓使用者可以重試
-        startBtn.disabled = false;
-        Swal.fire({
-            title: '鏡頭錯誤',
-            text: '請確認已授權相機權限，並嘗試重新整理網頁！',
-            icon: 'error',
-            confirmButtonColor: '#0ea5e9'
-        });
+        Swal.fire('鏡頭錯誤', '請確認已授權相機權限，並嘗試重新整理網頁！', 'error');
     }
 }
 
-// --- 3. 綁定按鈕事件 ---
+// 3. 綁定按鈕點擊事件 (確保在一個地方完成)
 if(startBtn) startBtn.addEventListener('click', startCameraEngine);
 
 if(switchBtn) {
     switchBtn.addEventListener('click', () => {
-        // 切換前後鏡頭
+        // 切換模式並重新啟動
         currentFacingMode = (currentFacingMode === 'environment') ? 'user' : 'environment';
         
-        // 顯示切換動畫，提升互動感
         Swal.fire({
-            title: '切換中...',
+            title: '切換鏡頭中...',
             timer: 800,
             showConfirmButton: false,
             didOpen: () => { Swal.showLoading(); }
@@ -1528,6 +1517,7 @@ if(stopBtn) stopBtn.addEventListener('click', () => {
     videoEl.srcObject = null;
     videoEl.style.display = 'none'; 
     document.getElementById('camera-overlay').classList.remove('hidden'); 
+    
     startBtn.disabled = false; 
     stopBtn.disabled = true; 
     switchBtn.disabled = true; 
