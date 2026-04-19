@@ -1577,7 +1577,7 @@ if(rescanBtn) rescanBtn.addEventListener('click', async () => {
     try {
         const response = await fetch(`${SERVER_URL}/scan_image`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ image: base64Image })
+            body: JSON.stringify({ image: compressedImage })
         });
         const data = await response.json();
         
