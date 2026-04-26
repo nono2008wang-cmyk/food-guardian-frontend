@@ -1387,7 +1387,7 @@ window.checkExpiryAndNotify = async function(forceShow = false) {
             const deleteExpiredBtn = document.getElementById('delete-expired-btn');
             // 👇 從這裡開始，貼上你的新程式碼 👇
             // ==========================================
-            // 🔔 提醒按鈕：純網頁內建版 (不需 GAS/LINE/手機權限)
+            // 🔔 提醒按鈕：純網頁內建版 (不需手機權限，保證不報錯)
             // ==========================================
             const notifyBtn = document.getElementById('notify-btn');
 
@@ -1417,7 +1417,7 @@ window.checkExpiryAndNotify = async function(forceShow = false) {
                     if (isNotifyEnabled) {
                         Swal.fire({
                             title: '提醒已開啟',
-                            text: '系統將在您「打開網頁」或「新增食材」時，自動彈窗警告即期品！',
+                            text: '系統將在您打開網頁時自動彈窗警告即期品！',
                             icon: 'success',
                             confirmButtonColor: '#10b981'
                         });
@@ -1427,35 +1427,6 @@ window.checkExpiryAndNotify = async function(forceShow = false) {
                     }
                 });
             }
-// 綁定「開啟提醒」按鈕授權
-if (notifyBtn) {
-    // 初始化按鈕文字狀態
-    if (("Notification" in window) && Notification.permission === "granted") {
-        notifyBtn.innerText = "🔔 通知已開啟";
-        notifyBtn.classList.add('bg-green-100', 'text-green-700', 'border', 'border-green-200');
-    }
-
-    notifyBtn.addEventListener('click', () => {
-        if (!("Notification" in window)) {
-            Swal.fire('不支援', '您的瀏覽器不支援桌面通知功能', 'error');
-        } else if (Notification.permission === "granted") {
-            // 如果已經開啟，強制幫他檢查一次（測試用）
-            checkExpiryAndNotify(true);
-        } else if (Notification.permission !== "denied") {
-            // 請求權限
-            Notification.requestPermission().then(permission => {
-                if (permission === "granted") {
-                    notifyBtn.innerText = "🔔 通知已開啟";
-                    notifyBtn.classList.add('bg-green-100', 'text-green-700', 'border', 'border-green-200');
-                    Swal.fire('成功', '通知權限已開啟，未來有即期品會自動提醒您！', 'success');
-                    checkExpiryAndNotify(true); // 剛授權完馬上檢查一次
-                }
-            });
-        } else {
-            Swal.fire('權限被拒絕', '您已拒絕通知。請到瀏覽器設定中手動開啟。', 'error');
-        }
-    });
-}
 
 
             // Camera & DB Logic
