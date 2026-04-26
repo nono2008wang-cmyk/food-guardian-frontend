@@ -20,6 +20,41 @@
             background-size: 24px 24px; 
         }
 
+/* 📱 手機底部導航動態凸起特效 */
+        .mobile-nav-item {
+            position: relative; display: flex; flex-direction: column;
+            align-items: center; justify-content: flex-end;
+            height: 64px; flex: 1; cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .mobile-icon-box {
+            position: absolute; top: 14px;
+            width: 36px; height: 36px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.25rem; background-color: transparent; color: #94a3b8; 
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 10;
+        }
+        .mobile-nav-text {
+            font-size: 10px; font-weight: 700; color: #94a3b8;
+            margin-bottom: 6px; transition: all 0.3s ease;
+        }
+
+        /* 🌟 啟用狀態 (往上浮動並改變顏色) */
+        .mobile-nav-item.active .mobile-icon-box {
+            top: -20px; /* 向上浮動出導航列 */
+            width: 56px; height: 56px;
+            background-color: #0ea5e9; /* 食光守護者的主題藍 */
+            color: white;
+            border: 4px solid white; /* 用白色粗邊框製造出凹槽的錯覺 */
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4);
+            font-size: 1.75rem;
+        }
+        .mobile-nav-item.active .mobile-nav-text {
+            color: #0ea5e9;
+            transform: translateY(4px);
+        }
+
         /* 動畫特效 */
         @keyframes fade-in-up {
             from { opacity: 0; transform: translateY(20px); }
@@ -121,28 +156,30 @@
         </div>
        
     </nav>
-    <div class="md:hidden fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-md border-t border-slate-100 z-[60] shadow-[0_-5px_15px_-5px_rgba(0,0,0,0.05)] pb-safe">
-    <div class="grid grid-cols-5 items-end px-1 pt-2 pb-2">
-        <a onclick="switchTab('inventory')" class="flex flex-col items-center p-2 text-slate-400 hover:text-sky-500 transition active:scale-95 cursor-pointer">
-            <span class="text-xl mb-1">🥦</span><span class="text-[10px] font-bold">庫存</span>
-        </a>
-        <a onclick="switchTab('recipes')" class="flex flex-col items-center p-2 text-slate-400 hover:text-sky-500 transition active:scale-95 cursor-pointer">
-            <span class="text-xl mb-1">🍳</span><span class="text-[10px] font-bold">食譜</span>
-        </a>
-        <a onclick="switchTab('calendar')" class="flex flex-col items-center px-2 pb-2 relative cursor-pointer">
-            <div class="bg-sky-500 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg border-4 border-white absolute -top-8 transform active:scale-95 transition">
-                <span class="text-2xl">📅</span>
-            </div>
-            <span class="text-[10px] font-bold text-sky-600 mt-6">效期</span>
-        </a>
-        <a onclick="switchTab('shopping')" class="flex flex-col items-center p-2 text-slate-400 hover:text-sky-500 transition active:scale-95 cursor-pointer">
-            <span class="text-xl mb-1">🛒</span><span class="text-[10px] font-bold">購物</span>
-        </a>
-        <a onclick="document.getElementById('mobile-more-menu').classList.toggle('hidden')" class="flex flex-col items-center p-2 text-slate-400 hover:text-sky-500 transition active:scale-95 cursor-pointer relative">
-            <span class="text-xl mb-1">⭐</span><span class="text-[10px] font-bold">更多</span>
-        </a>
+    <div class="md:hidden fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-md z-[60] shadow-[0_-5px_20px_rgba(0,0,0,0.05)] pb-safe rounded-t-2xl border-t border-slate-100">
+        <div class="flex justify-between items-end h-[68px] px-1 relative">
+            <a id="mob-nav-inventory" onclick="switchTab('inventory')" class="mobile-nav-item active">
+                <div class="mobile-icon-box">🥦</div>
+                <span class="mobile-nav-text">庫存</span>
+            </a>
+            <a id="mob-nav-recipes" onclick="switchTab('recipes')" class="mobile-nav-item">
+                <div class="mobile-icon-box">🍳</div>
+                <span class="mobile-nav-text">食譜</span>
+            </a>
+            <a id="mob-nav-calendar" onclick="switchTab('calendar')" class="mobile-nav-item">
+                <div class="mobile-icon-box">📅</div>
+                <span class="mobile-nav-text">效期</span>
+            </a>
+            <a id="mob-nav-shopping" onclick="switchTab('shopping')" class="mobile-nav-item">
+                <div class="mobile-icon-box">🛒</div>
+                <span class="mobile-nav-text">購物</span>
+            </a>
+            <a id="mob-nav-more" onclick="document.getElementById('mobile-more-menu').classList.toggle('hidden')" class="mobile-nav-item">
+                <div class="mobile-icon-box">⭐</div>
+                <span class="mobile-nav-text">更多</span>
+            </a>
+        </div>
     </div>
-</div>
 
 <div id="mobile-more-menu" class="hidden md:hidden fixed bottom-20 right-4 bg-white rounded-xl shadow-xl border border-slate-100 p-2 z-[60] flex-col gap-1 w-36 animate-fade-up">
     <a onclick="switchTab('analytics'); document.getElementById('mobile-more-menu').classList.add('hidden')" class="flex items-center gap-3 px-4 py-3 hover:bg-sky-50 rounded-lg text-sm font-bold text-slate-600 cursor-pointer">
@@ -824,6 +861,19 @@
             document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
             const activeNav = document.getElementById(`nav-${tabName}`);
             if(activeNav) activeNav.classList.add('active');
+
+            // 👇👇👇 請把整段 JavaScript 貼在這裡 👇👇👇 
+            // 手機版底部導航列的動態凸起切換
+            document.querySelectorAll('.mobile-nav-item').forEach(item => item.classList.remove('active'));
+            const activeMobNav = document.getElementById(`mob-nav-${tabName}`);
+            if(activeMobNav) activeMobNav.classList.add('active');
+            
+            // 貼心細節：如果是點擊「更多」裡面的功能，把「⭐更多」按鈕凸起來
+            if(['analytics', 'community', 'interactive', 'storybook'].includes(tabName)) {
+                const moreBtn = document.getElementById('mob-nav-more');
+                if(moreBtn) moreBtn.classList.add('active');
+            }
+            // 👆👆👆 貼到這裡結束 👆👆👆
             
             // 獨立首頁導航列控制
             const nav = document.getElementById('main-nav');
@@ -1551,7 +1601,7 @@ if(rescanBtn) rescanBtn.addEventListener('click', async () => {
     
     // 🚨 終極修復：這裡已經幫你改成 videoEl 了！絕不會再當機！🚨
     ctx.drawImage(videoEl, 0, 0, targetSize, targetSize);
-    const compressedImage = canvas.toDataURL('image/jpeg', 0.5);
+    const compressedImage = canvas.toDataURL('image/jpeg', 0.3);
     
     try {
         const response = await fetch(`${SERVER_URL}/scan_image`, {
