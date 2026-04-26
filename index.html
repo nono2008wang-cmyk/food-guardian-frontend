@@ -115,21 +115,15 @@
     <!-- 導航列 (預設隱藏，進入系統後顯示) -->
     <nav id="main-nav" class="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-50 hidden transition-all duration-500">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                <!-- 點擊 Logo 回到首頁 -->
-                <div class="flex items-center gap-2 cursor-pointer" onclick="switchTab('landing')">
-    <span class="text-2xl font-black text-slate-800 tracking-tight">
-        食光<span class="text-sky-500">守護者</span>
-    </span>
-</div>
-                    
-    <div class="hidden sm:flex flex-col justify-center font-bold leading-tight whitespace-nowrap">
-    
-</div>
+            <div class="flex justify-between h-16 items-center w-full">
+                
+                <div class="flex items-center gap-2 cursor-pointer shrink-0" onclick="switchTab('landing')">
+                    <span class="text-xl sm:text-2xl font-black text-slate-800 tracking-tight">
+                        食光<span class="text-sky-500">守護者</span>
+                    </span>
                 </div>
 
                 <div class="hidden md:flex space-x-1 overflow-x-auto no-scrollbar w-full ml-4">
-                    <!-- 功能選單 -->
                     <a onclick="switchTab('inventory')" id="nav-inventory" class="nav-link">食材管理</a>
                     <a onclick="switchTab('calendar')" id="nav-calendar" class="nav-link">效期日曆</a>
                     <a onclick="switchTab('recipes')" id="nav-recipes" class="nav-link">食譜匹配</a>
@@ -140,7 +134,7 @@
                     <a onclick="switchTab('storybook')" id="nav-storybook" class="nav-link">繪本故事</a>
                 </div>
                
-                <div class="relative ml-4" id="user-menu-container">
+                <div class="relative ml-auto shrink-0 pl-2" id="user-menu-container">
                      <button id="login-btn" class="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 shadow-sm transition">
                         <span>登入</span>
                     </button>
@@ -155,8 +149,10 @@
                         </button>
                     </div>
                 </div>
+
             </div>
         </div>
+    </nav>
        
     </nav>
     <div class="md:hidden fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-md z-[60] shadow-[0_-5px_20px_rgba(0,0,0,0.05)] pb-safe rounded-t-2xl border-t border-slate-100">
