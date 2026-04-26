@@ -1387,7 +1387,7 @@ window.checkExpiryAndNotify = async function(forceShow = false) {
             const deleteExpiredBtn = document.getElementById('delete-expired-btn');
             // 👇 從這裡開始，貼上你的新程式碼 👇
             // ==========================================
-            // 🔔 通知按鈕：開啟/關閉切換邏輯
+            // 🔔 通知按鈕：手機與電腦通用版 (結合 LINE Notify)
             // ==========================================
             const notifyBtn = document.getElementById('notify-btn');
 
@@ -1395,60 +1395,38 @@ window.checkExpiryAndNotify = async function(forceShow = false) {
                 // 1. 取得當前設定，預設為開啟
                 let isNotifyEnabled = localStorage.getItem('foodGuardianNotifyStatus') !== 'off';
 
-                // 2. 定義一個函數來更新按鈕的外觀
+                // 2. 更新按鈕外觀
                 function updateNotifyBtnUI() {
                     if (!isNotifyEnabled) {
                         notifyBtn.innerText = "🔕 通知已關閉";
                         notifyBtn.className = "text-xs bg-slate-100 text-slate-400 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-200 transition font-bold";
-                    } else if (("Notification" in window) && Notification.permission === "granted") {
-                        notifyBtn.innerText = "🔔 通知已開啟";
-                        notifyBtn.className = "text-xs bg-green-50 text-green-600 px-3 py-1.5 rounded-lg border border-green-200 hover:bg-green-100 transition font-bold";
                     } else {
-                        notifyBtn.innerText = "🔔 開啟提醒";
-                        notifyBtn.className = "text-xs bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg hover:bg-slate-200 transition font-bold shadow-sm";
+                        notifyBtn.innerText = "🔔 通知已開啟";
+                        notifyBtn.className = "text-xs bg-green-50 text-green-600 px-3 py-1.5 rounded-lg border border-green-200 hover:bg-green-100 transition font-bold shadow-sm";
                     }
                 }
 
-                // 初始化時先更新一次外觀
-                updateNotifyBtnUI();
+                updateNotifyBtnUI(); // 初始執行一次
 
-                // 3. 綁定點擊事件
+                // 3. 綁定點擊事件 (不再讓手機報錯)
                 notifyBtn.addEventListener('click', () => {
-                    if (!("Notification" in window)) {
-                        Swal.fire('不支援', '您的瀏覽器不支援桌面通知功能', 'error');
-                        return;
-                    }
+                    isNotifyEnabled = !isNotifyEnabled; // 切換開關
+                    localStorage.setItem('foodGuardianNotifyStatus', isNotifyEnabled ? 'on' : 'off');
+                    updateNotifyBtnUI();
 
-                    if (Notification.permission === "granted") {
-                        // 👉 如果已經授權過了，就當作「開/關」切換鍵
-                        isNotifyEnabled = !isNotifyEnabled;
-                        localStorage.setItem('foodGuardianNotifyStatus', isNotifyEnabled ? 'on' : 'off');
-                        updateNotifyBtnUI(); // 變更按鈕顏色
-
-                        if (isNotifyEnabled) {
-                            Swal.fire('通知已開啟', '系統將會自動提醒您食材效期！', 'success');
-                            checkExpiryAndNotify(true); // 馬上測試一下
-                        } else {
-                            Swal.fire('通知已暫停', '您已關閉提醒，系統將不再主動打擾。', 'info');
+                    if (isNotifyEnabled) {
+                        Swal.fire('通知已開啟', '系統將會自動提醒您食材效期！', 'success');
+                        checkExpiryAndNotify(true); // 觸發檢查與 LINE 通知
+                        
+                        // 如果是電腦版，順便請求一下桌面通知權限 (不強迫)
+                        if ("Notification" in window && Notification.permission === "default") {
+                            Notification.requestPermission();
                         }
-
-                    } else if (Notification.permission !== "denied") {
-                        // 👉 如果還沒授權過，就向瀏覽器請求權限
-                        Notification.requestPermission().then(permission => {
-                            if (permission === "granted") {
-                                isNotifyEnabled = true;
-                                localStorage.setItem('foodGuardianNotifyStatus', 'on');
-                                updateNotifyBtnUI();
-                                Swal.fire('成功', '通知權限已開啟，未來有即期品會自動提醒您！', 'success');
-                                checkExpiryAndNotify(true);
-                            }
-                        });
                     } else {
-                        Swal.fire('權限被拒絕', '您已拒絕通知。請到瀏覽器網址列左側的設定中手動開啟。', 'error');
+                        Swal.fire('通知已暫停', '您已關閉提醒，系統將不再主動打擾。', 'info');
                     }
                 });
             }
-            // 👆 新程式碼到這邊結束 👆
 // 綁定「開啟提醒」按鈕授權
 if (notifyBtn) {
     // 初始化按鈕文字狀態
