@@ -1387,38 +1387,43 @@ window.checkExpiryAndNotify = async function(forceShow = false) {
             const deleteExpiredBtn = document.getElementById('delete-expired-btn');
             // 👇 從這裡開始，貼上你的新程式碼 👇
             // ==========================================
-            // 🔔 通知按鈕：純網頁內建彈窗版 (絕對不會報錯)
+            // 🔔 提醒按鈕：純網頁內建版 (不需 GAS/LINE/手機權限)
             // ==========================================
             const notifyBtn = document.getElementById('notify-btn');
 
             if (notifyBtn) {
-                // 1. 取得當前設定，預設為開啟
+                // 1. 從手機空間讀取當前設定 (預設為開啟)
                 let isNotifyEnabled = localStorage.getItem('foodGuardianNotifyStatus') !== 'off';
 
-                // 2. 更新按鈕外觀
+                // 2. 更新按鈕外觀函數
                 function updateNotifyBtnUI() {
                     if (!isNotifyEnabled) {
                         notifyBtn.innerText = "🔕 提醒已關閉";
-                        notifyBtn.className = "text-xs bg-slate-100 text-slate-400 px-3 py-1.5 rounded-lg border border-slate-200 transition font-bold";
+                        notifyBtn.className = "text-xs bg-slate-100 text-slate-400 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-200 transition font-bold";
                     } else {
                         notifyBtn.innerText = "🔔 系統提醒中";
-                        notifyBtn.className = "text-xs bg-green-50 text-green-600 px-3 py-1.5 rounded-lg border border-green-200 transition font-bold shadow-sm";
+                        notifyBtn.className = "text-xs bg-green-50 text-green-600 px-3 py-1.5 rounded-lg border border-green-200 hover:bg-green-100 transition font-bold shadow-sm";
                     }
                 }
 
-                updateNotifyBtnUI(); 
+                updateNotifyBtnUI(); // 頁面載入時初始化
 
-                // 3. 綁定點擊事件 (只負責網頁內的彈窗，不向手機要權限)
+                // 3. 點擊事件：只負責切換網頁內的「彈窗開關」
                 notifyBtn.addEventListener('click', () => {
                     isNotifyEnabled = !isNotifyEnabled; 
                     localStorage.setItem('foodGuardianNotifyStatus', isNotifyEnabled ? 'on' : 'off');
                     updateNotifyBtnUI();
 
                     if (isNotifyEnabled) {
-                        Swal.fire('提醒已開啟', '每次打開系統時，若有即期食材將自動彈出警告！', 'success');
-                        checkExpiryAndNotify(true); // 馬上檢查一次
+                        Swal.fire({
+                            title: '提醒已開啟',
+                            text: '系統將在您「打開網頁」或「新增食材」時，自動彈窗警告即期品！',
+                            icon: 'success',
+                            confirmButtonColor: '#10b981'
+                        });
+                        checkExpiryAndNotify(true); // 馬上檢查一次並跳出 SweetAlert
                     } else {
-                        Swal.fire('提醒已暫停', '已關閉即期彈窗警告。', 'info');
+                        Swal.fire('提醒已暫停', '系統將不再主動彈出過期警告。', 'info');
                     }
                 });
             }
